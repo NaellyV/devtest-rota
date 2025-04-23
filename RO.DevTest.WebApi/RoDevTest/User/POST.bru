@@ -1,0 +1,22 @@
+meta {
+  name: POST
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:5087/api/user
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "userName": "myuser",
+    "name": "My User",
+    "email": "myuser@example.com",
+    "password": "Tesy@1234",
+    "passwordConfirmation": "Tesy@1234",
+    "role": 0
+  }
+}

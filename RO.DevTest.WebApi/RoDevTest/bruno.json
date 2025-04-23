@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "RoDevTest",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

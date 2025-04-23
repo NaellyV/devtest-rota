@@ -4,7 +4,7 @@ namespace RO.DevTest.Domain.Entities
 {
     public class Product : BaseEntity
     {
-        public string Name { get; set; }
-        public decimal Price { get; set; }
+        public required string Name { get; set; }
+        public required decimal Price { get; set; }
     }
 }

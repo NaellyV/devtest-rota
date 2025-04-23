@@ -5,8 +5,6 @@ namespace RO.DevTest.Persistence.Repositories
 {
     public class ClientRepository : BaseRepository<Client>, IClientRepository
     {
-        public ClientRepository(DefaultContext context) : base(context)
-        {
-        }
+        public ClientRepository(DefaultContext context) : base(context) { }
     }
 }

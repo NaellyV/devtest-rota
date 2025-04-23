@@ -22,8 +22,7 @@ namespace RO.DevTest.Application.Features.Products.Commands
                 Price = request.Price
             };
 
-            await _productRepository.AddAsync(product);
-            return product;
+            return await _productRepository.CreateAsync(product, cancellationToken);
         }
     }
 }

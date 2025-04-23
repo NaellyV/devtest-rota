@@ -5,8 +5,7 @@ namespace RO.DevTest.Persistence.Repositories
 {
     public class SaleProductRepository : BaseRepository<SaleProduct>, ISaleProductRepository
     {
-        public SaleProductRepository(DefaultContext context) : base(context)
-        {
-        }
+        public SaleProductRepository(DefaultContext context) : base(context) { }
     }
 }
+

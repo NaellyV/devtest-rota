@@ -23,8 +23,7 @@ namespace RO.DevTest.Application.Features.Clients.Commands
                 Phone = request.Phone
             };
 
-            await _clientRepository.AddAsync(client);
-            return client;
+            return await _clientRepository.CreateAsync(client, cancellationToken);
         }
     }
 }

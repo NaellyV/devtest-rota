@@ -26,6 +26,9 @@ namespace RO.DevTest.Application.Features.Sales.Commands
                 SaleProducts = new List<SaleProduct>()
             };
 
+            // Primeiro cria a venda (sale)
+            sale = await _saleRepository.CreateAsync(sale, cancellationToken);
+
             foreach (var p in request.Products)
             {
                 var saleProduct = new SaleProduct
@@ -37,11 +40,10 @@ namespace RO.DevTest.Application.Features.Sales.Commands
                     UnitPrice = p.UnitPrice
                 };
 
+                await _saleProductRepository.CreateAsync(saleProduct, cancellationToken);
                 sale.SaleProducts.Add(saleProduct);
-                await _saleProductRepository.AddAsync(saleProduct);
             }
 
-            await _saleRepository.AddAsync(sale);
             return sale;
         }
     }

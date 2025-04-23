@@ -1,17 +1,19 @@
 ﻿namespace RO.DevTest.Application.Features.User.Commands.CreateUserCommand;
 
-public record CreateUserResult {
-    public string Id { get; set; } = string.Empty;
-    public string UserName { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
+public record CreateUserResult
+{
+    public string Id { get; init; } = string.Empty;
+    public string UserName { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
+    public string Email { get; init; } = string.Empty;
+    public string Message { get; init; } = "Usuário criado com sucesso"; 
+    public CreateUserResult() { }
 
-    public CreateUserResult () { }
-
-    public CreateUserResult(Domain.Entities.User user) { 
+    public CreateUserResult(Domain.Entities.User user) 
+    {
         Id = user.Id;
-        UserName = user.UserName!;
-        Email = user.Email!;
-        Name = user.Name!;
+        UserName = user.UserName ?? string.Empty;
+        Email = user.Email ?? string.Empty;
+        Name = user.Name ?? string.Empty;
     }
 }

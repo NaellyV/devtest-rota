@@ -1,22 +1,41 @@
+using Microsoft.AspNetCore.Identity;
 using RO.DevTest.Application;
-using RO.DevTest.Infrastructure.IoC;
+using RO.DevTest.Application.Contracts.Infrastructure;
+using RO.DevTest.Domain.Entities;
+using RO.DevTest.Infrastructure.Abstractions;
+using RO.DevTest.Persistence;
 using RO.DevTest.Persistence.IoC;
+using FluentValidation; 
+using RO.DevTest.Application.Features.User.Commands.CreateUserCommand; // Adicione este using
 
 namespace RO.DevTest.WebApi;
 
-public class Program {
-    public static void Main(string[] args) {
+public class Program
+{
+    public static void Main(string[] args)
+    {
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        // Injetando as dependências da persistência e passando a configuração
-        builder.Services.InjectPersistenceDependencies(builder.Configuration)
-            .InjectInfrastructureDependencies();
+        builder.Services.AddPersistence(builder.Configuration);
 
-        // Adicionando o MediatR
+        builder.Services.AddIdentity<User, IdentityRole>(options =>
+        {
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequiredLength = 8;
+            options.User.RequireUniqueEmail = true;
+        })
+        .AddEntityFrameworkStores<DefaultContext>()
+        .AddDefaultTokenProviders();
+
+        builder.Services.AddScoped<IIdentityAbstractor, IdentityAbstractor>();
+
         builder.Services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblies(
@@ -25,16 +44,19 @@ public class Program {
             );
         });
 
+        builder.Services.AddValidatorsFromAssemblyContaining<CreateUserCommandValidator>();
+      
         var app = builder.Build();
 
-        // Configurar o pipeline de requisições HTTP
-        if (app.Environment.IsDevelopment()) {
+        if (app.Environment.IsDevelopment())
+        {
             app.UseSwagger();
             app.UseSwaggerUI();
         }
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
