@@ -1,13 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore; // Adicione este using
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity; // Para IdentityRole
 using RO.DevTest.Domain.Entities;
 
 namespace RO.DevTest.Persistence
 {
-    public class DefaultContext : DbContext
+    public class DefaultContext : IdentityDbContext<User, IdentityRole, string> // Herda de IdentityDbContext
     {
         public DefaultContext(DbContextOptions<DefaultContext> options) : base(options) { }
 
-        public DbSet<User> Users { get; set; }
+        // Mantenha seus DbSets existentes
         public DbSet<Client> Clients { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Sale> Sales { get; set; }
@@ -15,30 +17,27 @@ namespace RO.DevTest.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(modelBuilder); // Importante para Identity!
 
-            // Configuração do relacionamento Sale <-> SaleProducts
+            // Suas configurações personalizadas...
             modelBuilder.Entity<Sale>()
                 .HasMany(s => s.SaleProducts)
                 .WithOne(sp => sp.Sale) 
                 .HasForeignKey(sp => sp.SaleId)
                 .OnDelete(DeleteBehavior.Cascade);  
 
-            // Configuração do relacionamento Product <-> SaleProducts
             modelBuilder.Entity<SaleProduct>()
                 .HasOne(sp => sp.Product)
                 .WithMany()  
                 .HasForeignKey(sp => sp.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);  // Evita deletar Product com vendas associadas
+                .OnDelete(DeleteBehavior.Restrict);
 
-           
-            modelBuilder.Entity<User>().HasKey(u => u.Id);
+            // Configurações de chave e decimal (opcional, se já definido pelo Identity)
             modelBuilder.Entity<Client>().HasKey(c => c.Id);
             modelBuilder.Entity<Product>().HasKey(p => p.Id);
             modelBuilder.Entity<Sale>().HasKey(s => s.Id);
             modelBuilder.Entity<SaleProduct>().HasKey(sp => sp.Id);
 
-            
             modelBuilder.Entity<Sale>()
                 .Property(s => s.TotalAmount)
                 .HasColumnType("decimal(18,2)");
