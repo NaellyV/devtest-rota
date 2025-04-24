@@ -1,12 +1,17 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 using RO.DevTest.Application;
 using RO.DevTest.Application.Contracts.Infrastructure;
 using RO.DevTest.Domain.Entities;
 using RO.DevTest.Infrastructure.Abstractions;
 using RO.DevTest.Persistence;
 using RO.DevTest.Persistence.IoC;
-using FluentValidation; 
-using RO.DevTest.Application.Features.User.Commands.CreateUserCommand; // Adicione este using
+using FluentValidation;
+using RO.DevTest.Application.Features.User.Commands.CreateUserCommand;
+using System.Text;
+using RO.DevTest.Infrastructure.Services;
+using RO.DevTest.Application.Common.Interfaces;
 
 namespace RO.DevTest.WebApi;
 
@@ -22,6 +27,7 @@ public class Program
 
         builder.Services.AddPersistence(builder.Configuration);
 
+        // Configuração do Identity
         builder.Services.AddIdentity<User, IdentityRole>(options =>
         {
             options.Password.RequireDigit = true;
@@ -34,8 +40,30 @@ public class Program
         .AddEntityFrameworkStores<DefaultContext>()
         .AddDefaultTokenProviders();
 
-        builder.Services.AddScoped<IIdentityAbstractor, IdentityAbstractor>();
+        // Configuração da Autenticação JWT
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            };
+        });
 
+        builder.Services.AddScoped<IIdentityAbstractor, IdentityAbstractor>();
+        builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblies(
