@@ -1,9 +1,10 @@
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using RO.DevTest.Application.Contracts.Persistance.Repositories;
+using RO.DevTest.Domain.Entities;
 using RO.DevTest.Application.Features.Clients.Commands;
 using RO.DevTest.Application.Features.Clients.Commands.UpdateClient;
 using RO.DevTest.Application.Features.Clients.Commands.DeleteClient;
-using RO.DevTest.Domain.Entities;
+using MediatR;
 
 namespace RO.DevTest.API.Controllers
 {
@@ -11,14 +12,32 @@ namespace RO.DevTest.API.Controllers
     [ApiController]
     public class ClientController : ControllerBase
     {
+        private readonly IClientRepository _clientRepository;
         private readonly IMediator _mediator;
 
-        public ClientController(IMediator mediator)
+        public ClientController(IClientRepository clientRepository, IMediator mediator)
         {
+            _clientRepository = clientRepository;
             _mediator = mediator;
         }
 
-       [HttpPost]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Client>>> GetAll()
+        {
+            var clients = await _clientRepository.GetAllAsync();
+            return Ok(clients);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Client>> GetById(Guid id)
+        {
+            var client = await _clientRepository.GetByIdAsync(id);
+            if (client == null)
+                return NotFound();
+            return Ok(client);
+        }
+
+        [HttpPost]
         public async Task<ActionResult<Client>> Create([FromBody] CreateClientCommand command)
         {
             var result = await _mediator.Send(command);
@@ -41,8 +60,5 @@ namespace RO.DevTest.API.Controllers
             await _mediator.Send(new DeleteClientCommand { Id = id });
             return NoContent();
         }
-
-        
-
     }
 }
