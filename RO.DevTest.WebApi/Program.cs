@@ -12,6 +12,7 @@ using RO.DevTest.Application.Features.User.Commands.CreateUserCommand;
 using System.Text;
 using RO.DevTest.Infrastructure.Services;
 using RO.DevTest.Application.Common.Interfaces;
+using Microsoft.EntityFrameworkCore; // Certifique-se de que esta linha está presente
 
 namespace RO.DevTest.WebApi;
 
@@ -25,7 +26,7 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        builder.Services.AddPersistence(builder.Configuration);
+        builder.Services.AddPersistence(builder.Configuration); // Mantenha esta linha como estava
 
         // Configuração do Identity
         builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -39,6 +40,9 @@ public class Program
         })
         .AddEntityFrameworkStores<DefaultContext>()
         .AddDefaultTokenProviders();
+
+        // **Adicione esta linha aqui:**
+        builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<DefaultContext>());
 
         // Configuração da Autenticação JWT
         builder.Services.AddAuthentication(options =>
@@ -73,7 +77,7 @@ public class Program
         });
 
         builder.Services.AddValidatorsFromAssemblyContaining<CreateUserCommandValidator>();
-      
+
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())
@@ -88,20 +92,6 @@ public class Program
         app.UseAuthorization();
 
         app.MapControllers();
-
-        if (app.Environment.IsDevelopment())
-        {
-            app.MapGet("/debug/routes", () =>
-            {
-                var endpoints = app.Services.GetRequiredService<EndpointDataSource>();
-                return endpoints.Endpoints
-                    .OfType<RouteEndpoint>()
-                    .Select(e => new {
-                        Method = e.Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods?.FirstOrDefault() ?? "ANY",
-                        Path = e.RoutePattern.RawText ?? string.Empty
-                    });
-            });
-        }
 
         app.Run();
     }

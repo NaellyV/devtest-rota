@@ -1,6 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using RO.DevTest.Application.Features.Clients.Commands.CreateClient;
+using RO.DevTest.Application.Features.Clients.Commands;
 using RO.DevTest.Application.Features.Clients.Commands.UpdateClient;
 using RO.DevTest.Application.Features.Clients.Commands.DeleteClient;
 using RO.DevTest.Domain.Entities;
@@ -18,7 +18,7 @@ namespace RO.DevTest.API.Controllers
             _mediator = mediator;
         }
 
-        [HttpPost]
+       [HttpPost]
         public async Task<ActionResult<Client>> Create([FromBody] CreateClientCommand command)
         {
             var result = await _mediator.Send(command);
@@ -41,5 +41,8 @@ namespace RO.DevTest.API.Controllers
             await _mediator.Send(new DeleteClientCommand { Id = id });
             return NoContent();
         }
+
+        
+
     }
 }
