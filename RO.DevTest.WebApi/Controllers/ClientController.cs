@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using RO.DevTest.Application.Features.Clients.Commands;
+using RO.DevTest.Application.Features.Clients.Commands.CreateClient;
+using RO.DevTest.Application.Features.Clients.Commands.UpdateClient;
+using RO.DevTest.Application.Features.Clients.Commands.DeleteClient;
 using RO.DevTest.Domain.Entities;
 
 namespace RO.DevTest.API.Controllers
@@ -21,6 +23,23 @@ namespace RO.DevTest.API.Controllers
         {
             var result = await _mediator.Send(command);
             return Ok(result);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateClientCommand command)
+        {
+            if (id != command.Id)
+                return BadRequest("Id mismatch");
+
+            await _mediator.Send(command);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            await _mediator.Send(new DeleteClientCommand { Id = id });
+            return NoContent();
         }
     }
 }
