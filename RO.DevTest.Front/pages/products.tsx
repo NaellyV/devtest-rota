@@ -1,18 +1,15 @@
 export default function ProductsPage() {
-    // Dados mockados
     const products = [
       { id: 1, name: 'Pastilha de Freio', price: 89.90, stock: 45, category: 'Freios' },
       { id: 2, name: 'Óleo Motor 5W30', price: 34.90, stock: 120, category: 'Lubrificantes' },
-      // ... mais produtos
     ];
   
     return (
       <div className="bg-white p-6 rounded-xl shadow-lg">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Produtos</h1>
-          <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition">
-            + Novo Produto
-          </button>
+          <a href="/new_product" className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition inline-block rounded-lg">
+  + Novo Produto</a>
         </div>
   
         {/* Filtros */}
@@ -67,7 +64,6 @@ export default function ProductsPage() {
           ))}
         </div>
   
-        {/* Paginação (similar à de clientes) */}
       </div>
     );
   }

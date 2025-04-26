@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using RO.DevTest.Application.Contracts.Infrastructure;
-using RO.DevTest.Domain.Exception;
+using RO.DevTest.Domain.Exceptions;
 
 namespace RO.DevTest.Application.Features.User.Commands.CreateUserCommand;
 

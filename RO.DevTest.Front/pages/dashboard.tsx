@@ -1,34 +1,123 @@
-import { FiShoppingCart, FiUsers, FiPackage, FiDollarSign, FiPieChart, FiBarChart2, FiPlusCircle, FiFileText } from 'react-icons/fi';
+import { FiShoppingCart, FiUsers, FiPackage, FiDollarSign, FiPieChart, FiBarChart2, FiPlusCircle, FiFileText, FiLogOut } from 'react-icons/fi';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import { fetchApi } from '../lib/api';
+
+interface UserData {
+  userName: string;
+  role: string;
+}
+
+interface SummaryData {
+  clients: number;
+  products: number;
+  salesToday: number;
+  revenue: number;
+}
+
+interface Sale {
+  id: string;
+  client: string;
+  date: string;
+  value: number;
+}
 
 export default function Dashboard() {
-  const userData = {
-    name: "Maria Silva",
-    role: "Administrador"
+  const router = useRouter();
+  const [userData, setUserData] = useState<UserData>({
+    userName: "",
+    role: ""
+  });
+
+  const [summaryData, setSummaryData] = useState<SummaryData>({
+    clients: 0,
+    products: 0,
+    salesToday: 0,
+    revenue: 0
+  });
+
+  const [recentSales, setRecentSales] = useState<Sale[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+
+    loadDashboardData(token);
+  }, []);
+
+  const loadDashboardData = async (token: string) => {
+    try {
+      const userResponse = await fetchApi('User/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!userResponse.ok) throw new Error('Failed to load user data');
+      
+      const user = await userResponse.json();
+      setUserData({
+        userName: user.name,
+        role: user.role === 1 ? 'Administrador' : 'Cliente'
+      });
+
+      const [summaryRes, salesRes] = await Promise.all([
+        fetchApi('Dashboard/summary', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }),
+        fetchApi('Sales/recent', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+      ]);
+
+      if (!summaryRes.ok || !salesRes.ok) throw new Error('Failed to load dashboard data');
+
+      setSummaryData(await summaryRes.json());
+      setRecentSales(await salesRes.json());
+
+    } catch (error) {
+      console.error('Dashboard error:', error);
+      if (error instanceof Error && error.message.includes('401')) {
+        router.push('/login');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const summaryData = {
-    clients: 245,
-    products: 189,
-    salesToday: 15,
-    revenue: 8750.50
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    sessionStorage.removeItem('authToken');
+    router.push('/login');
   };
 
-  const recentSales = [
-    { id: "#1001", client: "Auto Peças Ltda", date: "10/05/2023", value: 1250.00 },
-    { id: "#1000", client: "Mecânica Rápida", date: "10/05/2023", value: 850.50 },
-    { id: "#999", client: "Oficina Master", date: "09/05/2023", value: 2200.00 },
-    { id: "#998", client: "Auto Center São Paulo", date: "09/05/2023", value: 650.00 },
-    { id: "#997", client: "Peças & Cia", date: "08/05/2023", value: 1800.00 }
-  ];
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Carregando dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Cabeçalho */}
+      {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-indigo-600">Rota das Oficinas - E-commerce</h1>
+              <h1 className="text-xl font-bold text-indigo-600">Rota das Oficinas</h1>
               <nav className="ml-10 flex space-x-8">
                 <a href="/clients" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">Clientes</a>
                 <a href="/products" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">Produtos</a>
@@ -42,19 +131,23 @@ export default function Dashboard() {
                 {userData.role}
               </span>
               
-              <div className="relative ml-3">
+              <div className="relative ml-3 group">
                 <div className="flex items-center cursor-pointer">
                   <span className="rounded-full bg-indigo-200 h-8 w-8 flex items-center justify-center text-indigo-700 font-medium">
-                    {userData.name.charAt(0)}
+                    {userData.userName.charAt(0)}
                   </span>
-                  <span className="ml-2 text-sm font-medium text-gray-700">{userData.name}</span>
+                  <span className="ml-2 text-sm font-medium text-gray-700">{userData.userName}</span>
                 </div>
                 
-                <div className="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                <div className="hidden group-hover:block origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
                   <div className="py-1">
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Editar Perfil</a>
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Configurações</a>
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sair</a>
+                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Perfil</a>
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                    >
+                      <FiLogOut className="mr-2" /> Sair
+                    </button>
                   </div>
                 </div>
               </div>
@@ -63,10 +156,10 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* Conteúdo Principal */}
+      {/* Main Content */}
       <main className="flex-1 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Cards Resumos */}
+          {/* Summary Cards */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-6">
             <div className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition">
               <div className="px-4 py-5 sm:p-6">
@@ -75,10 +168,10 @@ export default function Dashboard() {
                     <FiUsers className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-5 w-0 flex-1">
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total de Clientes</dt>
+                    <dt className="text-sm font-medium text-gray-500 truncate">Clientes</dt>
                     <dd className="flex items-baseline">
                       <div className="text-2xl font-semibold text-gray-900">{summaryData.clients}</div>
-                      <a href="#" className="ml-2 text-sm font-medium text-indigo-600 hover:text-indigo-500">Ver todos</a>
+                      <a href="/clients" className="ml-2 text-sm font-medium text-indigo-600 hover:text-indigo-500">Ver todos</a>
                     </dd>
                   </div>
                 </div>
@@ -92,7 +185,7 @@ export default function Dashboard() {
                     <FiPackage className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-5 w-0 flex-1">
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total de Produtos</dt>
+                    <dt className="text-sm font-medium text-gray-500 truncate">Produtos</dt>
                     <dd className="flex items-baseline">
                       <div className="text-2xl font-semibold text-gray-900">{summaryData.products}</div>
                       <a href="#" className="ml-2 text-sm font-medium text-indigo-600 hover:text-indigo-500">Ver todos</a>
@@ -126,18 +219,10 @@ export default function Dashboard() {
                     <FiDollarSign className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-5 w-0 flex-1">
-                    <dt className="text-sm font-medium text-gray-500 truncate">Renda Mensal</dt>
+                    <dt className="text-sm font-medium text-gray-500 truncate">Receita</dt>
                     <dd className="flex items-baseline">
                       <div className="text-2xl font-semibold text-gray-900">
                         {summaryData.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                      </div>
-                      <div className="ml-2 flex items-baseline text-sm font-semibold text-green-600">
-                        <span className="sr-only">Período</span>
-                        <select className="ml-1 border-0 bg-transparent text-sm font-medium text-indigo-600 focus:outline-none">
-                          <option>Mês</option>
-                          <option>Semana</option>
-                          <option>Hoje</option>
-                        </select>
                       </div>
                     </dd>
                   </div>
@@ -146,26 +231,18 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Gráficos e Atalhos */}
+          {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            {/* Gráfico Vendas por Período */}
             <div className="bg-white shadow rounded-lg p-6 lg:col-span-2">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-medium text-gray-900">Vendas por Período</h2>
-                <div className="flex space-x-2">
-                  <button className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded-md">7 dias</button>
-                  <button className="px-3 py-1 text-sm bg-white text-gray-700 rounded-md border">30 dias</button>
-                </div>
-              </div>
+              <h2 className="text-lg font-medium text-gray-900 mb-4">Vendas Recentes</h2>
               <div className="h-64 bg-gray-50 rounded-md flex items-center justify-center">
                 <FiBarChart2 className="h-16 w-16 text-gray-300" />
                 <span className="ml-2 text-gray-400">Gráfico de vendas</span>
               </div>
             </div>
 
-            {/* Gráfico Produtos Mais Vendidos */}
             <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Produtos Mais Vendidos</h2>
+              <h2 className="text-lg font-medium text-gray-900 mb-4">Produtos Populares</h2>
               <div className="h-64 bg-gray-50 rounded-md flex items-center justify-center">
                 <FiPieChart className="h-16 w-16 text-gray-300" />
                 <span className="ml-2 text-gray-400">Gráfico de produtos</span>
@@ -173,22 +250,22 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Atalhos Rápidos */}
+          {/* Quick Actions */}
           <div className="mb-6">
             <div className="flex flex-wrap gap-4">
-              <a href="#" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none">
+              <a href="#" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
                 <FiPlusCircle className="mr-2" /> Nova Venda
               </a>
-              <a href="#" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none">
-                <FiPlusCircle className="mr-2" /> Cadastrar Produto
+              <a href="#" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
+                <FiPlusCircle className="mr-2" /> Novo Produto
               </a>
-              <a href="#" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none">
-                <FiFileText className="mr-2" /> Gerar Relatório
+              <a href="#" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700">
+                <FiFileText className="mr-2" /> Relatório
               </a>
             </div>
           </div>
 
-          {/* Últimas Vendas */}
+          {/* Recent Sales */}
           <div className="bg-white shadow rounded-lg overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
               <h2 className="text-lg font-medium text-gray-900">Últimas Vendas</h2>
@@ -211,7 +288,7 @@ export default function Dashboard() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sale.client}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sale.date}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {Number(sale.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        {sale.value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                       </td>
                     </tr>
                   ))}
@@ -222,11 +299,11 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* Rodapé */}
+      {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-sm text-gray-500">
-            Rota das Oficinas - E-commerce v1.0 • contato@rotadasoficinas.com.br
+            © {new Date().getFullYear()} Rota das Oficinas - Todos os direitos reservados
           </p>
         </div>
       </footer>

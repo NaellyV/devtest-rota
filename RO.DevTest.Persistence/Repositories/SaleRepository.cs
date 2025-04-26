@@ -9,21 +9,32 @@ namespace RO.DevTest.Persistence.Repositories
     {
         public SaleRepository(DefaultContext context) : base(context) { }
 
-        // Implementação do AddAsync específico
         public async Task AddAsync(Sale sale)
         {
             await _context.Sales.AddAsync(sale);
             await _context.SaveChangesAsync();
         }
 
-        // Implementação do método personalizado
        public async Task<IEnumerable<Sale>> GetSalesByPeriodAsync(DateTime startDate, DateTime endDate)
-{
-    return await _context.Sales
-        .Where(s => s.SaleDate >= startDate && s.SaleDate <= endDate)
-        .Include(s => s.SaleProducts)
-            .ThenInclude(sp => sp.Product) // Agora funciona!
-        .ToListAsync();
-}
+        {
+            return await _context.Sales
+                .Where(s => s.SaleDate >= startDate && s.SaleDate <= endDate)
+                .Include(s => s.SaleProducts)
+                    .ThenInclude(sp => sp.Product) 
+                .ToListAsync();
+        }
+
+
+         public async Task<IEnumerable<Sale>> GetAllAsync()
+        {
+            return await _context.Sales.ToListAsync();
+
+        }
+
+        public async Task<Sale?> GetByIdAsync(Guid id)
+        {
+            return await _context.Sales.FindAsync(id);
+
+        }
     }
 }

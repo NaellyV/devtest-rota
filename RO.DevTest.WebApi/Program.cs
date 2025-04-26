@@ -12,7 +12,7 @@ using RO.DevTest.Application.Features.User.Commands.CreateUserCommand;
 using System.Text;
 using RO.DevTest.Infrastructure.Services;
 using RO.DevTest.Application.Common.Interfaces;
-using Microsoft.EntityFrameworkCore; // Certifique-se de que esta linha está presente
+using Microsoft.EntityFrameworkCore;
 
 namespace RO.DevTest.WebApi;
 
@@ -26,9 +26,21 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        builder.Services.AddPersistence(builder.Configuration); // Mantenha esta linha como estava
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowNextJS",
+                policy =>
+                {
+                    policy.WithOrigins(
+                            "http://localhost:3000")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                            .AllowCredentials(); 
+                });
+        });
 
-        // Configuração do Identity
+        builder.Services.AddPersistence(builder.Configuration); 
+
         builder.Services.AddIdentity<User, IdentityRole>(options =>
         {
             options.Password.RequireDigit = true;
@@ -41,10 +53,8 @@ public class Program
         .AddEntityFrameworkStores<DefaultContext>()
         .AddDefaultTokenProviders();
 
-        // **Adicione esta linha aqui:**
         builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<DefaultContext>());
 
-        // Configuração da Autenticação JWT
         builder.Services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -87,6 +97,8 @@ public class Program
         }
 
         app.UseHttpsRedirection();
+
+        app.UseCors("AllowNextJS");
 
         app.UseAuthentication();
         app.UseAuthorization();

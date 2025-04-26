@@ -7,13 +7,14 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        brand: {
-          background: '#F4F4F5',
-          panel: '#E5E5E5',
-          primary: '#2563EB',
-          hover: '#1D4ED8',
-          text: '#111827',
-        },
+        background: '#F4F7F5',
+        primary: '#FF6600',
+        'primary-hover': '#e65c00',
+        'muted-foreground': '#6b7280',
+        foreground: '#08090A',
+      },
+      borderRadius: {
+        '2xl': '1rem',
       },
     },
   },

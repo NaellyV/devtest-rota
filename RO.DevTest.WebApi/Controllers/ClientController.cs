@@ -22,11 +22,20 @@ namespace RO.DevTest.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Client>>> GetAll()
-        {
-            var clients = await _clientRepository.GetAllAsync();
-            return Ok(clients);
-        }
+public async Task<ActionResult<IEnumerable<Client>>> GetAll()
+{
+    var userIdClaim = User.FindFirst("sub")?.Value;
+
+    if (userIdClaim == null)
+        return Unauthorized();
+
+    var userId = Guid.Parse(userIdClaim);
+
+    var clients = await _clientRepository.GetAllByUserIdAsync(userId); // <- Aqui você buscaria os clientes do user
+
+    return Ok(clients);
+}
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Client>> GetById(Guid id)

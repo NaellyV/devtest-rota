@@ -1,15 +1,67 @@
+import React, { useState } from 'react';
+import { registerUser } from '../services/authService';
+import { useRouter } from 'next/router';
+
 export default function RegisterForm() {
-    return (
-    <div className="flex items-center justify-center">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Crie sua conta</h1>
-          <p className="text-gray-600">Preencha os campos para se registrar</p>
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    userName: '',
+    name: '',
+    email: '',
+    password: '',
+    passwordConfirmation: '',
+    role: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const result = await registerUser(formData);
+      console.log('Sucesso:', result);
+      router.push('/login?registered=true');
+    } catch (error) {
+      let errorMessage = 'Erro durante o registro';
+      if (error instanceof Error) {
+        errorMessage = error.message.split('(Status:')[0].trim();
+      }
+      setError(errorMessage);
+      console.error('Erro completo:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-8">
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-primary">Crie sua conta</h1>
+          <p className="text-muted-foreground mt-2">Preencha os campos para se registrar</p>
         </div>
-  
-        <form className="space-y-4">
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
+        <form className="space-y-5" onSubmit={handleSubmit}>
+          {/* Nome de usuário */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="username" className="text-sm font-medium text-foreground">
               Nome de Usuário *
             </label>
             <input
@@ -17,13 +69,16 @@ export default function RegisterForm() {
               name="userName"
               type="text"
               placeholder="mariasilva"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+              className="input"
               required
+              value={formData.userName}
+              onChange={handleChange}
             />
           </div>
-  
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+
+          {/* Nome completo */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="name" className="text-sm font-medium text-foreground">
               Nome Completo *
             </label>
             <input
@@ -31,13 +86,16 @@ export default function RegisterForm() {
               name="name"
               type="text"
               placeholder="Maria Silva"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+              className="input"
               required
+              value={formData.name}
+              onChange={handleChange}
             />
           </div>
-  
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+
+          {/* Email */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="email" className="text-sm font-medium text-foreground">
               Email *
             </label>
             <input
@@ -45,13 +103,16 @@ export default function RegisterForm() {
               name="email"
               type="email"
               placeholder="seu@email.com"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+              className="input"
               required
+              value={formData.email}
+              onChange={handleChange}
             />
           </div>
-  
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+
+          {/* Senha */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="password" className="text-sm font-medium text-foreground">
               Senha *
             </label>
             <input
@@ -59,14 +120,19 @@ export default function RegisterForm() {
               name="password"
               type="password"
               placeholder="••••••••"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+              className="input"
               required
+              value={formData.password}
+              onChange={handleChange}
             />
-            <p className="mt-1 text-xs text-gray-500">Mínimo 8 caracteres com letras e números</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Mínimo 8 caracteres com letras e números
+            </p>
           </div>
-  
-          <div>
-            <label htmlFor="passwordConfirmation" className="block text-sm font-medium text-gray-700 mb-1">
+
+          {/* Confirmar senha */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="passwordConfirmation" className="text-sm font-medium text-foreground">
               Confirme sua Senha *
             </label>
             <input
@@ -74,57 +140,51 @@ export default function RegisterForm() {
               name="passwordConfirmation"
               type="password"
               placeholder="••••••••"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+              className="input"
               required
+              value={formData.passwordConfirmation}
+              onChange={handleChange}
             />
           </div>
-  
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+
+          {/* Tipo de conta */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="role" className="text-sm font-medium text-foreground">
               Tipo de Conta *
             </label>
             <select
               id="role"
               name="role"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+              className="input"
               required
+              value={formData.role}
+              onChange={handleChange}
             >
               <option value="">Selecione um tipo</option>
-              <option value="1">Administrador</option>
-              <option value="2">Cliente</option>
+              <option value="0">Administrador</option>
+              <option value="1">Cliente</option>
             </select>
           </div>
-  
-          <div className="flex items-center">
-            <input
-              id="terms"
-              name="terms"
-              type="checkbox"
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-              required
-            />
-            <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-              Eu concordo com os <a href="#" className="text-indigo-600 hover:text-indigo-500">Termos de Serviço</a>
-            </label>
-          </div>
-  
+
+          {/* Botão */}
           <button
             type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 mt-4"
+            className="btn-primary mt-2"
+            disabled={isLoading}
           >
-            Registrar
+            {isLoading ? 'Registrando...' : 'Registrar'}
           </button>
         </form>
-  
+
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             Já tem uma conta?{' '}
-            <a href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <a href="/login" className="text-primary hover:underline font-medium">
               Faça login
             </a>
           </p>
         </div>
       </div>
-      </div>
-    );
-  }
+    </div>
+  );
+}
