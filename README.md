@@ -1,4 +1,4 @@
-# E-commerce System
+## E-commerce System
 
 Este repositório contém uma solução para um **teste técnico** de E-commerce, incluindo uma **API em .NET 8.0** e um **Frontend em Next.js com TailwindCSS**.
 
@@ -52,3 +52,13 @@ Este repositório contém uma solução para um **teste técnico** de E-commerce
 Acesse o Swagger:
 
 - [http://localhost:5087/swagger/index.html](http://localhost:5087/swagger/index.html)
+
+## Melhorias Futuras
+
+- Implementar filtragem de dados (backend e frontend)
+- Finalizar a integração completa entre frontend e backend
+- Deploy automático com CI/CD
+- Melhorar cobertura de testes (unitários e integração)
+- Suporte a múltiplos idiomas
+- Otimizar queries com Dapper
+- Ajustes gerais de responsividade e experiência do usuário
