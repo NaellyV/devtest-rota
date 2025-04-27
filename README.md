@@ -1,21 +1,58 @@
-# Rota das Oficinas Tecnical Test
-This project is the template to be used to create a basic e-commerce Web API.
-It already contains the basic structure of a API, that must be followed when adding more features.
+E-commerce System
 
-Some caracteristics of this template that  are:
+Este repositório contém uma solução para um teste técnico de E-commerce, incluindo uma API em .NET 8.0 e um Frontend em Next.js com TailwindCSS.
 
-- Built using .NET 8.0
-- Uses EntityFramework Core as it's ORM
-- Follows the [CQRS Pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs) and [Repository Pattern](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/infrastructure-persistence-layer-design)
-- Uses PostgreSql as it's database engine
-- Uses Xunit, Bogus and FluentAssertions to create tests
+    ⚠️ Observação:
+    Este projeto foi desenvolvido como parte de um teste técnico e não contempla todas as funcionalidades em sua versão final.
+    Atualmente, a filtragem de dados e a integração completa entre Frontend e Backend ainda não estão implementadas. Essas melhorias estão listadas nas seções futuras.
 
-## To Dos in the Project
-In the template there are some left unfinnished features that you must do to correctly create the API. Search **[TODO]**  to find theses features.
+Funcionalidades
 
-## Feel Free to Optimize or Refactor
-If you find some code that you think can be enhanced, feel free to refactor it. But the refactor should follow the patterns of the project. Also the refactor should be separeted onn it's own commit.
+    Clientes: Cadastro, edição, exclusão e listagem de clientes.
 
-## Creating a FrontEnd
-When creating the frontend you can choose any framework you want, but your application must connect with the Web API via HTTP requests, and it's code must be in the same repository as the Web API.
+    Produtos: Cadastro, edição, exclusão e listagem de produtos.
 
+    Vendas: Realização e gerenciamento de vendas associadas a clientes e produtos.
+
+    Autenticação: Sistema de login com JWT Tokens, considerando diferentes cargos de usuários (admin, vendedor, etc).
+
+    Interface Web: Frontend moderno e responsivo feito em Next.js + TailwindCSS.
+
+Tecnologias Utilizadas
+Backend (.NET 8.0)
+
+    .NET 8.0 Web API
+
+    Entity Framework Core
+
+    JWT Authentication
+
+    xUnit (Testes)
+
+    Swagger
+
+    Docker
+
+Frontend (Next.js)
+
+    Next.js 14
+
+    TailwindCSS
+
+Como rodar o projeto
+Pré-requisitos
+
+    .NET 8.0 SDK
+
+    Node.js 20+
+
+    Docker (opcional)
+
+    Yarn ou pnpm (opcional)
+
+
+Documentação da API
+
+Acesse o Swagger:
+
+http://localhost:5087/swagger/index.html
