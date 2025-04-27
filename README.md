@@ -27,7 +27,7 @@ Este repositório contém uma solução para um **teste técnico** de E-commerce
 - JWT Authentication
 - xUnit (Testes)
 - Swagger
-- Docker
+- PostgreSQL 
 
 ### Frontend (Next.js)
 
@@ -42,7 +42,7 @@ Este repositório contém uma solução para um **teste técnico** de E-commerce
 
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 - [Node.js 20+](https://nodejs.org/en)
-- [Docker](https://www.docker.com/) (opcional)
+- [PostgreSQL]
 - [Yarn](https://yarnpkg.com/) ou [pnpm](https://pnpm.io/) (opcional)
 
 ---
