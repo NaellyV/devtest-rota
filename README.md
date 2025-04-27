@@ -57,8 +57,5 @@ Acesse o Swagger:
 
 - Implementar filtragem de dados (backend e frontend)
 - Finalizar a integração completa entre frontend e backend
-- Deploy automático com CI/CD
+- Dockerização 
 - Melhorar cobertura de testes (unitários e integração)
-- Suporte a múltiplos idiomas
-- Otimizar queries com Dapper
-- Ajustes gerais de responsividade e experiência do usuário
